@@ -24,11 +24,11 @@
 @end
 
 #define MGValveWidth 15
-static CGFloat const progressLineHeight = 2.0f;
+//static CGFloat const progressLineHeight = 2.0f;
 @interface MGSlider ()
 
-@property (nonatomic, strong) UIView *untrackView;
-@property (nonatomic, strong) UIView *trackView;
+@property (nonatomic, strong) UIImageView *untrackView;
+@property (nonatomic, strong) UIImageView *trackView;
 @property (nonatomic, strong) UIImageView *valveIV;
 @property (nonatomic, assign) CGRect valveRect;
 @property (nonatomic, assign, getter=isSpot) BOOL spot;
@@ -58,19 +58,21 @@ static CGFloat const progressLineHeight = 2.0f;
     _trackColor = [UIColor orangeColor];
     _thumbColor = _trackColor;
     _margin = 20.0f;
+    _progressLineHeight = 2.0f;
 }
 
 - (void)setupSubviews
 {
-    _untrackView = [[UIView alloc] init];
+    _untrackView = [[UIImageView alloc] init];
     _untrackView.backgroundColor = _untrackColor;
     [self addSubview:_untrackView];
     
-    _trackView = [[UIView alloc] init];
+    _trackView = [[UIImageView alloc] init];
     _trackView.backgroundColor = _trackColor;
     [self addSubview:_trackView];
     
     _valveIV = [[UIImageView alloc] init];
+    _valveIV.contentMode = UIViewContentModeScaleAspectFit;
     _valveIV.backgroundColor = _thumbColor;
     [self addSubview:_valveIV];
     
@@ -136,7 +138,7 @@ static CGFloat const progressLineHeight = 2.0f;
     _trackView.x = _margin;
     _trackView.width =  _valveIV.centerX - _margin;
     
-    _valveRect = CGRectMake(self.valveIV.centerX - _thumbSize.width * 0.5, (self.height - _thumbSize.height) * 0.5, _thumbSize.width, _thumbSize.height);
+    _valveRect = CGRectMake(self.valveIV.centerX - _thumbSize.width * 0.5f, (self.height - _thumbSize.height) * 0.5f, _thumbSize.width, _thumbSize.height);
 }
 
 - (void)changeValue:(void(^_Nullable)(CGFloat value))changeEvent endValue:(void(^_Nullable)(CGFloat value))endValue
@@ -174,6 +176,12 @@ static CGFloat const progressLineHeight = 2.0f;
     _trackView.backgroundColor = trackColor;
 }
 
+- (void)setProgressLineHeight:(CGFloat)progressLineHeight
+{
+    _progressLineHeight = progressLineHeight;
+    [self updateSubviewFrame];
+}
+
 - (void)setThumbColor:(UIColor *)thumbColor
 {
     _thumbColor = thumbColor;
@@ -186,20 +194,43 @@ static CGFloat const progressLineHeight = 2.0f;
     [self updateSubviewFrame];
 }
 
+- (void)setThumbImage:(UIImage *)thumbImage
+{
+    _thumbImage = thumbImage;
+    self.valveIV.image = thumbImage;
+}
+
+- (void)setTrackImage:(UIImage *)trackImage
+{
+    _trackImage = trackImage;
+    if (trackImage) {
+        _trackView.image = [trackImage resizableImageWithCapInsets:UIEdgeInsetsZero resizingMode:UIImageResizingModeTile];
+    }
+}
+
+- (void)setUntrackImage:(UIImage *)untrackImage
+{
+    _untrackImage = untrackImage;
+    if (untrackImage) {
+        _untrackView.image = [untrackImage resizableImageWithCapInsets:UIEdgeInsetsZero resizingMode:UIImageResizingModeTile];
+    }
+}
+
 - (void)updateSubviewFrame
 {
-    _valveIV.frame = CGRectMake(_margin + (self.width - _margin * 2) * _progress, 0.5 * (self.height - _thumbSize.height), _thumbSize.width, _thumbSize.height);
+    _valveIV.frame = CGRectMake(_margin + (self.width - _margin * 2) * _progress, 0.5f * (self.height - _thumbSize.height), _thumbSize.width, _thumbSize.height);
     self.valveRect = _valveIV.frame;
-    _valveIV.layer.cornerRadius = _valveIV.width * 0.5;
+    _valveIV.layer.cornerRadius = _valveIV.width * 0.5f;
     _valveIV.layer.masksToBounds = YES;
     
-    _untrackView.frame = CGRectMake(_margin, 0.5*(self.height - progressLineHeight), self.width - _margin * 2, progressLineHeight);
-    _untrackView.layer.cornerRadius = _untrackView.height * 0.5;
+    _untrackView.frame = CGRectMake(_margin, 0.5f * (self.height - _progressLineHeight), self.width - _margin * 2, _progressLineHeight);
+    _untrackView.layer.cornerRadius = _untrackView.height * 0.5f;
     _untrackView.layer.masksToBounds = YES;
     
-    _trackView.frame = CGRectMake(_margin, 0.5*(self.height - progressLineHeight), _valveIV.centerX - _margin, progressLineHeight);
+    _trackView.frame = CGRectMake(_margin, 0.5f * (self.height - _progressLineHeight), _valveIV.centerX - _margin, _progressLineHeight);
     _trackView.layer.cornerRadius = _trackView.height * 0.5;
     _trackView.layer.masksToBounds = YES;
+
 }
 
 @end
